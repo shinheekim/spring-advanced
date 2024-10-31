@@ -26,29 +26,29 @@ public class TodoService {
     private final WeatherClient weatherClient;
 
     @Transactional
-    public TodoSaveResponse saveTodo(AuthUser authUser, TodoSaveRequest todoSaveRequest) {
-        User user = User.fromAuthUser(authUser);
+    public TodoSaveResponse createTodo(AuthUser authUser, TodoSaveRequest todoSaveRequest) {
+        User user = User.fromAuthUser(authUser.id(), authUser.email(), authUser.userRole());
 
-        String weather = weatherClient.getTodayWeather();
+        String weather = weatherClient.retrieveTodayWeather();
 
         Todo newTodo = new Todo(
-                todoSaveRequest.getTitle(),
-                todoSaveRequest.getContents(),
+                todoSaveRequest.title(),
+                todoSaveRequest.contents(),
                 weather,
                 user
         );
         Todo savedTodo = todoRepository.save(newTodo);
+        UserResponse userResponse = new UserResponse(user.getId(), user.getEmail());
 
         return new TodoSaveResponse(
                 savedTodo.getId(),
                 savedTodo.getTitle(),
                 savedTodo.getContents(),
                 weather,
-                new UserResponse(user.getId(), user.getEmail())
-        );
+                userResponse);
     }
 
-    public Page<TodoResponse> getTodos(int page, int size) {
+    public Page<TodoResponse> retrieveAllTodos(int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size);
 
         Page<Todo> todos = todoRepository.findAllByOrderByModifiedAtDesc(pageable);
@@ -64,9 +64,9 @@ public class TodoService {
         ));
     }
 
-    public TodoResponse getTodo(long todoId) {
-        Todo todo = todoRepository.findByIdWithUser(todoId)
-                .orElseThrow(() -> new InvalidRequestException("Todo not found"));
+    public TodoResponse retrieveTodo(long todoId) {
+        Todo todo = todoRepository.findByIdWithUser(todoId).orElseThrow(
+                () -> new InvalidRequestException("Todo not found"));
 
         User user = todo.getUser();
 
