@@ -1,13 +1,7 @@
 package org.example.expert.domain.user.dto.response;
 
-import lombok.Getter;
+public record UserSaveResponse(
+        String bearerToken
+) {
 
-@Getter
-public class UserSaveResponse {
-
-    private final String bearerToken;
-
-    public UserSaveResponse(String bearerToken) {
-        this.bearerToken = bearerToken;
-    }
 }
