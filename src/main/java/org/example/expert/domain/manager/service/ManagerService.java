@@ -30,7 +30,7 @@ public class ManagerService {
     private final TodoRepository todoRepository;
 
     @Transactional
-    public ManagerSaveResponse createManager(AuthUser authUser, long todoId, ManagerSaveRequest managerSaveRequest) {
+    public ManagerSaveResponse createManager(AuthUser authUser, Long todoId, ManagerSaveRequest managerSaveRequest) {
         User user = User.fromAuthUser(authUser.id(), authUser.email(), authUser.userRole());
         Todo todo = todoRepository.findById(todoId).orElseThrow(
                 () -> new InvalidRequestException("Todo not found"));
@@ -48,34 +48,24 @@ public class ManagerService {
 
         Manager newManagerUser = new Manager(managerUser, todo);
         Manager savedManagerUser = managerRepository.save(newManagerUser);
-        UserResponse userResponse = new UserResponse(managerUser.getId(), managerUser.getEmail());
 
-        return new ManagerSaveResponse(
-                savedManagerUser.getId(),
-                userResponse);
+        return ManagerSaveResponse.from(savedManagerUser);
     }
 
-    public List<ManagerResponse> retrieveAllManagers(long todoId) {
+    public List<ManagerResponse> retrieveAllManagers(Long todoId) {
         Todo todo = todoRepository.findById(todoId).orElseThrow(
                 () -> new InvalidRequestException("Todo not found"));
 
         List<Manager> managerList = managerRepository.findByTodoIdWithUser(todo.getId());
 
-        List<ManagerResponse> dtoList = new ArrayList<>();
-        for (Manager manager : managerList) {
-            User user = manager.getUser();
-            dtoList.add(new ManagerResponse(
-                    manager.getId(),
-                    new UserResponse(user.getId(), user.getEmail())
-            ));
-        }
-        return dtoList;
+        return managerList.stream()
+                .map(ManagerResponse::from)
+                .toList();
     }
 
     @Transactional
-    public void deleteManager(long userId, long todoId, long managerId) {
-        User user = userRepository.findById(userId).orElseThrow(
-                () -> new InvalidRequestException("User not found"));
+    public void deleteManager(AuthUser authUser, Long todoId, Long managerId) {
+        User user = User.fromAuthUser(authUser.id(), authUser.email(), authUser.userRole());
 
         Todo todo = todoRepository.findById(todoId).orElseThrow(
                 () -> new InvalidRequestException("Todo not found"));

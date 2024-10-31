@@ -14,7 +14,7 @@ public record CommentSaveResponse(
         return CommentSaveResponse.builder()
                 .id(comment.getId())
                 .contents(comment.getContents())
-                .user(new UserResponse(comment.getUser().getId(), comment.getUser().getEmail()))
+                .user(UserResponse.from(comment.getUser()))
                 .build();
     }
 }
