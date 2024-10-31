@@ -14,28 +14,29 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/todos")
 public class TodoController {
 
     private final TodoService todoService;
 
-    @PostMapping("/todos")
-    public ResponseEntity<TodoSaveResponse> saveTodo(
+    @PostMapping
+    public ResponseEntity<TodoSaveResponse> createTodo(
             @Auth AuthUser authUser,
             @Valid @RequestBody TodoSaveRequest todoSaveRequest
     ) {
-        return ResponseEntity.ok(todoService.saveTodo(authUser, todoSaveRequest));
+        return ResponseEntity.ok(todoService.createTodo(authUser, todoSaveRequest));
     }
 
-    @GetMapping("/todos")
-    public ResponseEntity<Page<TodoResponse>> getTodos(
+    @GetMapping
+    public ResponseEntity<Page<TodoResponse>> retrieveAllTodos(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        return ResponseEntity.ok(todoService.getTodos(page, size));
+        return ResponseEntity.ok(todoService.retrieveAllTodos(page, size));
     }
 
-    @GetMapping("/todos/{todoId}")
-    public ResponseEntity<TodoResponse> getTodo(@PathVariable long todoId) {
-        return ResponseEntity.ok(todoService.getTodo(todoId));
+    @GetMapping("/{todoId}")
+    public ResponseEntity<TodoResponse> retrieveTodo(@PathVariable long todoId) {
+        return ResponseEntity.ok(todoService.retrieveTodo(todoId));
     }
 }

@@ -17,27 +17,30 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/todos/{todoId}/managers")
 public class ManagerController {
 
     private final ManagerService managerService;
     private final JwtUtil jwtUtil;
 
-    @PostMapping("/todos/{todoId}/managers")
-    public ResponseEntity<ManagerSaveResponse> saveManager(
+    @PostMapping
+    public ResponseEntity<ManagerSaveResponse> createManager(
             @Auth AuthUser authUser,
             @PathVariable long todoId,
             @Valid @RequestBody ManagerSaveRequest managerSaveRequest
     ) {
-        return ResponseEntity.ok(managerService.saveManager(authUser, todoId, managerSaveRequest));
+        ManagerSaveResponse response = managerService.createManager(authUser, todoId, managerSaveRequest);
+        return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/todos/{todoId}/managers")
-    public ResponseEntity<List<ManagerResponse>> getMembers(@PathVariable long todoId) {
-        return ResponseEntity.ok(managerService.getManagers(todoId));
+    @GetMapping
+    public ResponseEntity<List<ManagerResponse>> retrieveAllManagers(@PathVariable long todoId) {
+        List<ManagerResponse> response = managerService.retrieveAllManagers(todoId);
+        return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("/todos/{todoId}/managers/{managerId}")
-    public void deleteManager(
+    @DeleteMapping("/{managerId}")
+    public ResponseEntity<String> deleteManager(
             @RequestHeader("Authorization") String bearerToken,
             @PathVariable long todoId,
             @PathVariable long managerId
@@ -45,5 +48,6 @@ public class ManagerController {
         Claims claims = jwtUtil.extractClaims(bearerToken.substring(7));
         long userId = Long.parseLong(claims.getSubject());
         managerService.deleteManager(userId, todoId, managerId);
+        return ResponseEntity.noContent().build();
     }
 }

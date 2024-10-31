@@ -15,21 +15,24 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/todos/{todoId}/comments")
 public class CommentController {
 
     private final CommentService commentService;
 
-    @PostMapping("/todos/{todoId}/comments")
-    public ResponseEntity<CommentSaveResponse> saveComment(
+    @PostMapping
+    public ResponseEntity<CommentSaveResponse> createComment(
             @Auth AuthUser authUser,
             @PathVariable long todoId,
             @Valid @RequestBody CommentSaveRequest commentSaveRequest
     ) {
-        return ResponseEntity.ok(commentService.saveComment(authUser, todoId, commentSaveRequest));
+        CommentSaveResponse response = commentService.createComment(authUser, todoId, commentSaveRequest);
+        return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/todos/{todoId}/comments")
-    public ResponseEntity<List<CommentResponse>> getComments(@PathVariable long todoId) {
-        return ResponseEntity.ok(commentService.getComments(todoId));
+    @GetMapping
+    public ResponseEntity<List<CommentResponse>> retrieveComments(@PathVariable long todoId) {
+        List<CommentResponse> responses = commentService.retrieveComments(todoId);
+        return ResponseEntity.ok(responses);
     }
 }

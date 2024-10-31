@@ -6,22 +6,27 @@ import org.example.expert.domain.common.dto.AuthUser;
 import org.example.expert.domain.user.dto.request.UserChangePasswordRequest;
 import org.example.expert.domain.user.dto.response.UserResponse;
 import org.example.expert.domain.user.service.UserService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/users")
 public class UserController {
 
     private final UserService userService;
 
-    @GetMapping("/users/{userId}")
-    public ResponseEntity<UserResponse> getUser(@PathVariable long userId) {
-        return ResponseEntity.ok(userService.getUser(userId));
+    @GetMapping("/{userId}")
+    public ResponseEntity<UserResponse> retrieveUser(@PathVariable long userId) {
+        UserResponse response = userService.retrieveUser(userId);
+        return ResponseEntity.ok(response);
     }
 
-    @PutMapping("/users")
-    public void changePassword(@Auth AuthUser authUser, @RequestBody UserChangePasswordRequest userChangePasswordRequest) {
-        userService.changePassword(authUser.getId(), userChangePasswordRequest);
+    @PutMapping
+    public ResponseEntity<String> changePassword(@Auth AuthUser authUser,
+                               @RequestBody UserChangePasswordRequest userChangePasswordRequest) {
+        userService.changePassword(authUser.id(), userChangePasswordRequest);
+        return ResponseEntity.ok().build();
     }
 }
