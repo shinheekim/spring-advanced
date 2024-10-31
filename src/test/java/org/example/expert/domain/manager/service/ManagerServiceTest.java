@@ -45,7 +45,7 @@ class ManagerServiceTest {
         given(todoRepository.findById(todoId)).willReturn(Optional.empty());
 
         // when & then
-        InvalidRequestException exception = assertThrows(InvalidRequestException.class, () -> managerService.getManagers(todoId));
+        InvalidRequestException exception = assertThrows(InvalidRequestException.class, () -> managerService.retrieveAllManagers(todoId));
         assertEquals("Manager not found", exception.getMessage());
     }
 
@@ -65,7 +65,7 @@ class ManagerServiceTest {
 
         // when & then
         InvalidRequestException exception = assertThrows(InvalidRequestException.class, () ->
-            managerService.saveManager(authUser, todoId, managerSaveRequest)
+            managerService.createManager(authUser, todoId, managerSaveRequest)
         );
 
         assertEquals("담당자를 등록하려고 하는 유저가 일정을 만든 유저가 유효하지 않습니다.", exception.getMessage());
@@ -86,19 +86,19 @@ class ManagerServiceTest {
         given(managerRepository.findByTodoIdWithUser(todoId)).willReturn(managerList);
 
         // when
-        List<ManagerResponse> managerResponses = managerService.getManagers(todoId);
+        List<ManagerResponse> managerResponses = managerService.retrieveAllManagers(todoId);
 
         // then
         assertEquals(1, managerResponses.size());
-        assertEquals(mockManager.getId(), managerResponses.get(0).getId());
-        assertEquals(mockManager.getUser().getEmail(), managerResponses.get(0).getUser().getEmail());
+        assertEquals(mockManager.getId(), managerResponses.get(0).id());
+        assertEquals(mockManager.getUser().getEmail(), managerResponses.get(0).user().email());
     }
 
     @Test // 테스트코드 샘플
     void todo가_정상적으로_등록된다() {
         // given
         AuthUser authUser = new AuthUser(1L, "a@a.com", UserRole.USER);
-        User user = User.fromAuthUser(authUser);  // 일정을 만든 유저
+        User user = User.fromAuthUser(authUser.id(), authUser.email(), authUser.userRole());  // 일정을 만든 유저
 
         long todoId = 1L;
         Todo todo = new Todo("Test Title", "Test Contents", "Sunny", user);
@@ -114,11 +114,11 @@ class ManagerServiceTest {
         given(managerRepository.save(any(Manager.class))).willAnswer(invocation -> invocation.getArgument(0));
 
         // when
-        ManagerSaveResponse response = managerService.saveManager(authUser, todoId, managerSaveRequest);
+        ManagerSaveResponse response = managerService.createManager(authUser, todoId, managerSaveRequest);
 
         // then
         assertNotNull(response);
-        assertEquals(managerUser.getId(), response.getUser().getId());
-        assertEquals(managerUser.getEmail(), response.getUser().getEmail());
+        assertEquals(managerUser.getId(), response.user().id());
+        assertEquals(managerUser.getEmail(), response.user().email());
     }
 }

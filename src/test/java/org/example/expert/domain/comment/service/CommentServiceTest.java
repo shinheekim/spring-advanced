@@ -44,7 +44,7 @@ class CommentServiceTest {
 
         // when
         ServerException exception = assertThrows(ServerException.class, () -> {
-            commentService.saveComment(authUser, todoId, request);
+            commentService.createComment(authUser, todoId, request);
         });
 
         // then
@@ -57,15 +57,15 @@ class CommentServiceTest {
         long todoId = 1;
         CommentSaveRequest request = new CommentSaveRequest("contents");
         AuthUser authUser = new AuthUser(1L, "email", UserRole.USER);
-        User user = User.fromAuthUser(authUser);
+        User user = User.fromAuthUser(1L, "email", UserRole.USER);
         Todo todo = new Todo("title", "title", "contents", user);
-        Comment comment = new Comment(request.getContents(), user, todo);
+        Comment comment = new Comment(request.contents(), user, todo);
 
         given(todoRepository.findById(anyLong())).willReturn(Optional.of(todo));
         given(commentRepository.save(any())).willReturn(comment);
 
         // when
-        CommentSaveResponse result = commentService.saveComment(authUser, todoId, request);
+        CommentSaveResponse result = commentService.createComment(authUser, todoId, request);
 
         // then
         assertNotNull(result);
